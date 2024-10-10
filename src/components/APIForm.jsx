@@ -23,7 +23,7 @@ const APIForm = ({inputs, handleChange, onSubmit}) => {
                     type="text"
                     name={category}
                     value={value}
-                    placeholder="Input this attribute..."
+                    placeholder={`Enter ${category} here`}
                     onChange={handleChange}
                     className="textbox"
                     />
