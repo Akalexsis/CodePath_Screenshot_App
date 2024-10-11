@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import APIForm from './components/APIForm'; 
+import Gallery from './components/Gallery';
 import './App.css'
 const ACCESS_KEY = import.meta.env.VITE_APP_ACCESS_KEY;
 
@@ -8,6 +9,9 @@ console.log(ACCESS_KEY);
 function App() {
   //  this holds our current screenshot
   const [screenshot, setScreenshot] = useState(null);
+  // array holds all previous screenshots
+  const [prevScreenshots, setPrevScreenshots] = useState([]);
+  console.log(prevScreenshots)
 
   //  elements user can include in screenshot
   const [inputs, setInputs] = useState({
@@ -19,6 +23,19 @@ function App() {
     height: "",
   });
 
+  // resets input values
+  const reset = () => {
+    // clears each value
+    setInputs({
+    url: "",
+    format: "",
+    no_ads: "",
+    no_cookie_banners: "",
+    width: "",
+    height: "",
+  })
+  }
+
   // API call
   const callAPI = async (query) => {
     try {
@@ -29,6 +46,10 @@ function App() {
       console.log(json); 
       // saves our current screenshot
       setScreenshot(json.url)
+      // use spread to get all prev imgs and add new one 
+      setPrevScreenshots((image) => [...image, json.url])
+      // clears form so users can enter another one
+      reset()
     } catch (err) {
       alert('There was an error when making your screenshot');
       console.log(err)
@@ -77,21 +98,6 @@ function App() {
     makeQuery();
   }
 
-  // resets input values
-  const reset = () => {
-    // clears each value
-    Object.entries(inputs).map(([category, value], index) => ( value = ''));
-
-    // setInputs({
-    //   url: "",
-    //   format: "",
-    //   no_ads: "",
-    //   no_cookie_banners: "",
-    //   width: "",
-    //   height: "",
-    // })
-  }
-
   return (
     <div className="whole-page">
       <h1>Build Your Own Screenshot! 📸</h1>
@@ -122,8 +128,11 @@ function App() {
           <br></br>
         </p>
       </div>
-
       <br></br>
+      
+      {/* conditional rendering to show screenshots( <Gallery allScreenshots={prevScreenshots} />) : */}
+      {prevScreenshots && prevScreenshots.length > 0 ? (<Gallery allScreenshots={prevScreenshots} />) : (<p>No images yet!</p>) }
+      
     </div>
   );
 }
