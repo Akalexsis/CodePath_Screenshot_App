@@ -3,6 +3,8 @@ import APIForm from './components/APIForm';
 import './App.css'
 const ACCESS_KEY = import.meta.env.VITE_APP_ACCESS_KEY;
 
+console.log(ACCESS_KEY);
+
 function App() {
   //  this holds our current screenshot
   const [screenshot, setScreenshot] = useState(null);
@@ -17,30 +19,20 @@ function App() {
     height: "",
   });
 
-  // how users should submit their form
-  const submitForm = () => {
-    // default values if user does not enter a value
-    let defaultValues = {
-      format: "jpeg",
-      no_ads: "true",
-      no_cookie_banners: "true",
-      width: "1920",
-      height: "1080",
-    };
-
-    // user should not be able to submit without url
-    if (!url) {
-      alert('Please enter a url!');
-    } else {
-      //  loops thru key: value values to determine if they're empty or not
-      for (const [key, value] of Object.entries(inputs)) {
-        if (!value) {
-          // if no value at that key, then key assigned default value
-          inputs[key] = defaultValues[key]
-        }
-      }
+  // API call
+  const callAPI = async (query) => {
+    try {
+      // send API request on the url we created query
+      const response = await fetch(query);
+      // returns API call from response into a json file
+      const json = await response.json();
+      console.log(json); 
+      // saves our current screenshot
+      setScreenshot(json.url)
+    } catch (err) {
+      alert('There was an error when making your screenshot');
+      console.log(err)
     }
-    makeQuery();
   }
 
   // func makes our complete URl for the API
@@ -54,26 +46,37 @@ function App() {
 
     let query = `https://api.apiflash.com/v1/urltoimage?access_key=${ACCESS_KEY}&url=${fullURL}&format=${inputs.format}&width=${inputs.width}&height=${inputs.height}&no_cookie_banners=${inputs.no_cookie_banners}&no_ads=${inputs.no_ads}&wait_until=${wait_until}&response_type=${response_type}&fail_on_status=${fail_on_status}`;
     
-    callAPI(query).catch(console.error)
+    console.log(query)
+    callAPI(query).catch(console.error);
   }
 
-  // API call
-  const callAPI = async (query) => {
-    try {
-      // send API request on the url we created query
-      const response = await fetch(query);
-      // returns API call from response into a json file
-      const json = await response.json();
-      console.log(json); 
+  // how users should submit their form
+  const submitForm = (e) => {
+    e.preventDefault();
+    // default values if user does not enter a value
+    let defaultValues = {
+      format: "jpeg",
+      no_ads: "true",
+      no_cookie_banners: "true",
+      width: "1920",
+      height: "1080",
+    };
 
-      // saves our current screenshot
-      setScreenshot(json.url)
-    } catch (error) {
-      alert('There was an error when making your screenshot')
-      console.log(error)
+    // user should not be able to submit without url
+    if (!inputs.url) {
+      alert('Please enter a url!');
+    } else {
+      //  loops thru key: value values to determine if they're empty or not
+      for (const [key, value] of Object.entries(inputs)) {
+        if (!value) {
+          // if no value at that key, then key assigned default value
+          inputs[key] = defaultValues[key]
+        }
+      }
     }
+    makeQuery();
   }
-  
+
   // resets input values
   const reset = () => {
     // clears each value
@@ -88,6 +91,7 @@ function App() {
     //   height: "",
     // })
   }
+
   return (
     <div className="whole-page">
       <h1>Build Your Own Screenshot! 📸</h1>
